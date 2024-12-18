@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeChrono</title>
+  <style>
+    /* Your existing CSS styles */
+    body {
+        background-color: #000000;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
+
+    #logo {
+        background-color: #000000;
+        color: #ffffff;
+        padding: 50px;
+        font-size: 36px;
+    }
+
+    .section {
+        display: none;
+        background-color: #ffffff;
+        color: #000000;
+        width: 300px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    button {
+        background-color: #000000;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        margin-top: 10px;
+        border-radius: 4px;
+    }
+
+    button:hover {
+        background-color: #005a91;
+    }
+
+    input, select {
+        width: 90%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    #notepad-section {
+        position: fixed;
+        top: 50px;
+        left: 0;
+        width: 300px;
+        height: 90%;
+        background-color: #fff;
+        color: #000;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: none;  
+        z-index: 9999;
+    }
+
+    #notepad-section textarea {
+        width: 100%;
+        height: 70%;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+
+    #schedule-section {
+        display: none;
+    }
+
+    .schedule-item {
+        background-color: #f4f4f4;
+        margin: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #class-list {
+        margin-top: 15px;
+        text-align: left;
+    }
+
+    #generate-schedule-button {
+        margin-top: 15px;
+        display: none;
+    }
+
+  </style>
+</head>
+<body onload="showSection('login-section')">
+<div id="logo">CodeChrono</div>
+
+<!-- Login Section -->
+<div id="login-section" class="section">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- Grade Section -->
+<div id="grade-section" class="section">
+    <h2>Enter Your Grade (9-12)</h2>
+    <input type="text" id="grade" placeholder="Grade">
+    <button onclick="submitGrade()">Submit</button>
+</div>
+
+<!-- Add Classes Section -->
+<div class="section" id="add-class-section">
+    <h2>Add Your Classes</h2>
+    <select id="category-select" onchange="populateClassOptions()">
+        <option value="cybersecurity">Cybersecurity</option>
+        <option value="software engineering">Software Engineering</option>
+        <option value="coding">Coding</option>
+        <option value="hardware">Hardware</option>
+        <option value="gaming">Gaming</option>
+    </select>
+    <select id="class-select">
+        <!-- Dynamically populated options go here -->
+    </select>
+    <button onclick="addClass()">Add Class</button>
+    <ul id="class-list"></ul>
+    <button id="generate-schedule-button" onclick="generateSchedule()" style="display:none;">Generate Schedule</button>
+</div>
+
+<!-- Schedule Section -->
+<div id="schedule-section" class="section">
+    <h2>Your Schedule</h2>
+    <div id="schedule-container"></div>
+</div>
+
+<!-- Notepad Section -->
+<div id="notepad-section">
+<h3>Notepad</h3>
+<textarea placeholder="Write your notes here..."></textarea>
+<button onclick="openNotepad()">Close</button>
+</div>
+ 
+<button onclick="openNotepad()">Open Notepad</button>
+</body>
+</html>
+
+<!-- New Button for Website -->
+<button onclick="window.location.href='https://codechronofcw.my.canva.site/'">Visit Our Website</button>
+
+<script>
+    let selectedClasses = [];
+
+    // Available classes
+    const classCategories = {
+        cybersecurity: [
+            "Cybersecurity II (Mr. Agyekum)",
+            "Internet Of Things (Mr. Errico)",
+            "PLTW Cybersecurity (Mr. Agyekum)",
+        ],
+        "software engineering": [
+            "Second Programming Language (Mrs. Satter)",
+            "Computer Science AP (Mrs. Satter)",
+            "Introduction to Java (Mrs. Satter)",
+            "PLTW Computer Science Essentials (Mrs. Wang, Mrs. Satter, or Mrs. Brown)",
+        ],
+        coding: [
+            "Second Programming Language (Mrs. Satter)",
+            "Computer Science AP (Mrs. Satter)",
+            "Introduction to Java (Mrs. Satter)",
+            "PLTW Computer Science Essentials (Mrs. Wang, Mrs. Satter, or Mrs. Brown)",
+        ],
+        hardware: [
+            "Advanced IT Problem Solving (Ms. Arevalo)",
+        ],
+        gaming: [
+            "Gaming Animation (Mrs. Brown)",
+            "Introduction to Esports UB (Mrs. Brown)",
+        ]
+    };
+
+    // Show a specific section
+    function showSection(sectionId) {
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => section.style.display = 'none');
+        document.getElementById(sectionId).style.display = 'block';
+    }
+
+    // Handle login
+    function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        if (username === "StudentIDNumber" && password === "StudentPassword") {
+            showSection("grade-section");
+        } else {
+            alert("Invalid login. Please try again.");
+        }
+    }
+
+    // Handle grade submission
+    function submitGrade() {
+        const grade = parseInt(document.getElementById("grade").value, 10);
+        if (grade >= 9 && grade <= 12) {
+            showSection("add-class-section");
+        } else {
+            alert("Please enter a valid grade between 9 and 12.");
+        }
+    }
+
+    // Populate class options based on selected category
+    function populateClassOptions() {
+        const category = document.getElementById("category-select").value;
+        const classSelect = document.getElementById("class-select");
+
+        // Clear any previous options
+        classSelect.innerHTML = "";
+
+        // Get the available classes for the selected category
+        const availableClasses = classCategories[category] || [];
+
+        // Populate the dropdown with available classes
+        availableClasses.forEach(className => {
+            const option = document.createElement("option");
+            option.value = className;
+            option.textContent = className;
+            classSelect.appendChild(option);
+        });
+    }
+
+    // Add a class to the selected classes list
+    function addClass() {
+        const classSelect = document.getElementById("class-select");
+        const selectedClass = classSelect.value;
+
+        if (selectedClass && !selectedClasses.includes(selectedClass)) {
+            selectedClasses.push(selectedClass);
+            updateClassList();
+        } else if (selectedClasses.length >= 8) {
+            alert("You can only add 8 classes.");
+        } else {
+            alert("Please select a valid class.");
+        }
+    }
+
+    // Update the list of selected classes
+    function updateClassList() {
+        const classList = document.getElementById("class-list");
+        classList.innerHTML = ""; // Clear previous list
+
+        selectedClasses.forEach((classItem, index) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${index + 1}. ${classItem}`;
+            classList.appendChild(listItem);
+        });
+
+        if (selectedClasses.length === 8) {
+            document.getElementById("generate-schedule-button").style.display = 'inline-block';
+        }
+    }
+
+    // Generate a schedule
+    function generateSchedule() {
+        const scheduleContainer = document.getElementById("schedule-container");
+        scheduleContainer.innerHTML = "";
+
+        const timeSlots = ["P1 S1", "P2 S1", "P3 S1", "P4 S1", "P1 S2", "P2 S2", "P3 S2", "P4 S2"];
+
+        selectedClasses.forEach((classItem, index) => {
+            const scheduleItem = document.createElement("div");
+            scheduleItem.classList.add("schedule-item");
+            scheduleItem.textContent = `${timeSlots[index]} - ${classItem}`;
+            scheduleContainer.appendChild(scheduleItem);
+        });
+
+        showSection("schedule-section");
+    }
+</script>
+</body>
+</html>
+
+
+
